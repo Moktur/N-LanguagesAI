@@ -110,63 +110,60 @@ GET /api/stats/{user_id}            # Get learning statistics
 6. **Anki Update**: Algorithm schedules next review in 2 days.
 7. **Review**: AI suggests next due cards based on performance data, filterable by category (e.g., "Arbeit").
 
-
 ```mermaid
-activityDiagram
-
-:User creates account;
-:User selects native language;
-:User chooses target languages;
-:Profile setup completed;
-
-repeat
-  :User inputs sentence in native language;
-  :System stores sentence in database;
-  :System calls translation API;
-  
-  fork
-    :AI translates to target language 1;
-    :Store translation 1 in database;
-  fork again
-    :AI translates to target language 2;
-    :Store translation 2 in database;
-  fork again
-    :AI translates to target language N;
-    :Store translation N in database;
-  end fork
-  
-  :Create flashcards for all translations;
-:repeat while (More sentences?) is (yes)
--> no;
-
-:User starts learning session;
-:System selects cards using Anki algorithm;
-
-while (Session active?) is (yes)
-  :Display flashcard to user;
-  :User inputs answer;
-  :Send to AI evaluation service;
-  :AI compares with correct translation;
-  :Calculate similarity score;
-  
-  if (Score ≥ 80%) then (yes)
-    :Mark card as known;
-    :Increase repetition interval;
-    :Award points to user;
-  else (no)
-    :Mark card as unknown;
-    :Decrease repetition interval;
-    :Provide improvement feedback;
-  endif
-  
-  :Update learning progress in database;
-endwhile (no)
-
-:Display session statistics;
-:End learning session;
-
-```
-
+flowchart TD
+    Start([Start]) --> A[User creates account]
+    A --> B[User selects native language]
+    B --> C[User chooses target languages]
+    C --> D[Profile setup completed]
+    D --> E{More sentences?}
+    
+    E -- Yes --> F[User inputs sentence in native language]
+    F --> G[System stores sentence in database]
+    G --> H[System calls translation API]
+    H --> I{Fork}
+    
+    I --> J[AI translates to target language 1]
+    I --> K[AI translates to target language 2]
+    I --> L[AI translates to target language N]
+    
+    J --> M[Store translation 1 in database]
+    K --> N[Store translation 2 in database]
+    L --> O[Store translation N in database]
+    
+    M --> P[Create flashcards for all translations]
+    N --> P
+    O --> P
+    
+    P --> E
+    
+    E -- No --> Q[User starts learning session]
+    Q --> R[System selects cards using Anki algorithm]
+    R --> S{Session active?}
+    
+    S -- Yes --> T[Display flashcard to user]
+    T --> U[User inputs answer]
+    U --> V[Send to AI evaluation service]
+    V --> W[AI compares with correct translation]
+    W --> X[Calculate similarity score]
+    X --> Y{Score ≥ 80%?}
+    
+    Y -- Yes --> Z[Mark card as known]
+    Z --> AA[Increase repetition interval]
+    AA --> AB[Award points to user]
+    
+    Y -- No --> AC[Mark card as unknown]
+    AC --> AD[Decrease repetition interval]
+    AD --> AE[Provide improvement feedback]
+    
+    AB --> AF[Update learning progress in database]
+    AE --> AF
+    AF --> S
+    
+    S -- No --> AG[Display session statistics]
+    AG --> AH[End learning session]
+    AH --> End([End])
+``` 
 ## 🗄️ Database Structure
 
 ```mermaid
