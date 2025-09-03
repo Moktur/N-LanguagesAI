@@ -112,61 +112,67 @@ GET /api/stats/{user_id}            # Get learning statistics
 
 
 ```mermaid
-@startuml
-title Aktivitätsdiagramm - Sprachlernapp Workflow
+graph TD;
+activityDiagram
+title Multilingual Language Learning App - Main Workflow
 
 start
 
-:User registriert sich;
-:User wählt Muttersprache und Zielsprachen;
-:User erstellt Profil;
+:User creates account;
+:User selects native language;
+:User chooses target languages;
+:Profile setup completed;
 
 repeat
-  :User gibt Satz in Muttersprache ein;
-  :System speichert Satz in Datenbank;
-  :System sendet Satz an KI-Übersetzungsdienst;
+  :User inputs sentence in native language;
+  :System stores sentence in database;
+  :System calls translation API;
   
   fork
-    :KI übersetzt in Zielsprache 1;
-    :System speichert Übersetzung 1;
+    :AI translates to target language 1;
+    :Store translation 1 in database;
   fork again
-    :KI übersetzt in Zielsprache 2;
-    :System speichert Übersetzung 2;
+    :AI translates to target language 2;
+    :Store translation 2 in database;
+  fork again
+    :AI translates to target language N;
+    :Store translation N in database;
   end fork
   
-  :System erstellt Karteikarten für alle Übersetzungen;
-:repeat while (Weitere Sätze eingeben?) is (ja)
--> nein;
+  :Create flashcards for all translations;
+:repeat while (More sentences?) is (yes)
+-> no;
 
-:User startet Lernsession;
-:System wählt Karteikarten basierend auf Anki-Algorithmus aus;
+:User starts learning session;
+:System selects cards using Anki algorithm;
 
-while (Lernsession läuft?) is (ja)
-  :System zeigt Karteikarte an;
-  :User gibt Antwort ein;
-  :System sendet Antwort an KI zur Bewertung;
-  :KI vergleicht mit korrekter Übersetzung;
-  :KI berechnet Ähnlichkeits-Score;
+while (Session active?) is (yes)
+  :Display flashcard to user;
+  :User inputs answer;
+  :Send to AI evaluation service;
+  :AI compares with correct translation;
+  :Calculate similarity score;
   
-  if (Score ≥ 80%) then (ja)
-    :System markiert Karteikarte als gewusst;
-    :System erhöht Wiederholungsintervall;
-    :Punkte werden gutgeschrieben;
-  else (nein)
-    :System markiert Karteikarte als nicht gewusst;
-    :System verringert Wiederholungsintervall;
-    :KI gibt Feedback zur Verbesserung;
+  if (Score ≥ 80%) then (yes)
+    :Mark card as known;
+    :Increase repetition interval;
+    :Award points to user;
+  else (no)
+    :Mark card as unknown;
+    :Decrease repetition interval;
+    :Provide improvement feedback;
   endif
   
-  :System aktualisiert Lernfortschritt in Datenbank;
-endwhile (nein)
+  :Update learning progress in database;
+endwhile (no)
 
-:System zeigt Lernstatistik an;
-:Session beendet;
+:Display session statistics;
+:End learning session;
 
 stop
 @enduml
-``` 
+```
+
 ## 🗄️ Database Structure
 
 ```mermaid
