@@ -114,8 +114,6 @@ GET /api/stats/{user_id}            # Get learning statistics
 ```mermaid
 activityDiagram
 
-start
-
 :User creates account;
 :User selects native language;
 :User chooses target languages;
@@ -166,8 +164,6 @@ endwhile (no)
 
 :Display session statistics;
 :End learning session;
-
-stop
 
 ```
 
