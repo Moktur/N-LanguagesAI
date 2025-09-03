@@ -110,7 +110,116 @@ GET /api/stats/{user_id}            # Get learning statistics
 6. **Anki Update**: Algorithm schedules next review in 2 days.
 7. **Review**: AI suggests next due cards based on performance data, filterable by category (e.g., "Arbeit").
 
+
+```mermaid
+@startuml
+title Aktivitätsdiagramm - Sprachlernapp Workflow
+
+start
+
+:User registriert sich;
+:User wählt Muttersprache und Zielsprachen;
+:User erstellt Profil;
+
+repeat
+  :User gibt Satz in Muttersprache ein;
+  :System speichert Satz in Datenbank;
+  :System sendet Satz an KI-Übersetzungsdienst;
+  
+  fork
+    :KI übersetzt in Zielsprache 1;
+    :System speichert Übersetzung 1;
+  fork again
+    :KI übersetzt in Zielsprache 2;
+    :System speichert Übersetzung 2;
+  end fork
+  
+  :System erstellt Karteikarten für alle Übersetzungen;
+:repeat while (Weitere Sätze eingeben?) is (ja)
+-> nein;
+
+:User startet Lernsession;
+:System wählt Karteikarten basierend auf Anki-Algorithmus aus;
+
+while (Lernsession läuft?) is (ja)
+  :System zeigt Karteikarte an;
+  :User gibt Antwort ein;
+  :System sendet Antwort an KI zur Bewertung;
+  :KI vergleicht mit korrekter Übersetzung;
+  :KI berechnet Ähnlichkeits-Score;
+  
+  if (Score ≥ 80%) then (ja)
+    :System markiert Karteikarte als gewusst;
+    :System erhöht Wiederholungsintervall;
+    :Punkte werden gutgeschrieben;
+  else (nein)
+    :System markiert Karteikarte als nicht gewusst;
+    :System verringert Wiederholungsintervall;
+    :KI gibt Feedback zur Verbesserung;
+  endif
+  
+  :System aktualisiert Lernfortschritt in Datenbank;
+endwhile (nein)
+
+:System zeigt Lernstatistik an;
+:Session beendet;
+
+stop
+@enduml
+``` 
 ## 🗄️ Database Structure
+
+```mermaid
+erDiagram
+    USERS ||--o{ USER_LANGUAGES : "has"
+    USERS ||--o{ SENTENCES : "creates"
+    USERS ||--o{ LEARNING_PROGRESS : "tracks"
+    SENTENCES ||--o{ TRANSLATIONS : "has"
+    TRANSLATIONS ||--o{ LEARNING_PROGRESS : "has"
+
+    USERS {
+        int id PK
+        string username
+        string native_language
+        datetime created_at
+    }
+
+    USER_LANGUAGES {
+        int id PK
+        int user_id FK
+        string language_code
+        datetime created_at
+    }
+
+    SENTENCES {
+        int id PK
+        int user_id FK
+        string original_text
+        string language_code
+        string category
+        datetime created_at
+    }
+
+    TRANSLATIONS {
+        int id PK
+        int sentence_id FK
+        string translated_text
+        string target_language
+        datetime created_at
+    }
+
+    LEARNING_PROGRESS {
+        int id PK
+        int user_id FK
+        int translation_id FK
+        decimal score
+        datetime last_reviewed
+        datetime next_review
+        int review_count
+        decimal success_rate
+    }
+```
+
 
 ### MVP Schema
 ```sql
