@@ -112,7 +112,6 @@ GET /api/stats/{user_id}            # Get learning statistics
 
 
 ```mermaid
-graph TD;
 activityDiagram
 
 start
@@ -169,7 +168,7 @@ endwhile (no)
 :End learning session;
 
 stop
-@enduml
+
 ```
 
 ## 🗄️ Database Structure
