@@ -114,7 +114,6 @@ GET /api/stats/{user_id}            # Get learning statistics
 ```mermaid
 graph TD;
 activityDiagram
-title Multilingual Language Learning App - Main Workflow
 
 start
 
