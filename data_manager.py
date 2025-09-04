@@ -90,3 +90,59 @@ class DataManager:
         # Also create initial Learning_Progress
         self.create_learning_progress(sentence.user_id, translation.id)
         return translation
+
+    # Learning Progress
+    def create_learning_progress(self, user_id, translation_id):
+        if Learning_Progress.query.filter_by(user_id=user_id, translation_id=translation_id).first():
+            return  # Already exists
+        progress = Learning_Progress(
+            user_id=user_id,
+            translation_id=translation_id,
+            score=0.0,  # Use float
+            last_reviewed=None,
+            next_review=datetime.utcnow().date(),
+            review_count=0,
+            success_rate=0.0,
+            # Add: ease_factor=2.5, interval_days=1, repetitions=0
+        )
+        self.db.session.add(progress)
+        self._commit()
+        return progress
+
+    def update_learning_progress(self, translation_id, new_score, is_success):
+        progress = Learning_Progress.query.filter_by(translation_id=translation_id).first()
+        if not progress:
+            raise ValueError("Progress not found")
+        progress.score = new_score
+        progress.review_count += 1
+        progress.success_rate = ((progress.success_rate * (progress.review_count - 1)) + (100 if is_success else 0)) / progress.review_count
+        progress.last_reviewed = datetime.utcnow()
+        # Simple interval update (expand with Anki logic or AI)
+        if is_success:
+            progress.next_review = progress.last_reviewed + timedelta(days=progress.interval_days * 2)  # Example
+        else:
+            progress.next_review = progress.last_reviewed + timedelta(days=1)
+        self._commit()
+        return progress
+
+    def get_due_reviews(self, user_id):
+        today = datetime.utcnow().date()
+        return Learning_Progress.query.filter(and_(Learning_Progress.user_id == user_id, Learning_Progress.next_review <= today)).all()
+
+    def get_learning_stats(self, user_id):
+        stats = {
+            'total_reviews': Learning_Progress.query.filter_by(user_id=user_id).count(),
+            'avg_success_rate': db.session.query(func.avg(Learning_Progress.success_rate)).filter_by(user_id=user_id).scalar() or 0,
+            # Add more: e.g., by category via joins
+        }
+        return stats
+
+    # Additional: For Anki scheduling (call AI with all progress data, then update next_review etc.)
+    def schedule_reviews(self, user_id, ai_schedule_data):
+        # ai_schedule_data: list of dicts from LLM JSON
+        for item in ai_schedule_data:
+            progress = Learning_Progress.query.filter_by(translation_id=item['translation_id']).first()
+            if progress:
+                progress.next_review = datetime.strptime(item['next_review'], '%Y-%m-%d').date()
+                # Update other fields like priority if added
+        self._commit()
