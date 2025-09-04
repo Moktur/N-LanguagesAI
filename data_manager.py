@@ -66,9 +66,27 @@ class DataManager:
     def delete_sentence(self, sentence_id):
         sentence = Sentences.query.get(sentence_id)
         if sentence:
-            ## Cascade delete translations and progress? Or handle explicitly.
+            # Cascade delete translations and progress? Or handle explicitly.
             self.db.session.delete(sentence)
             self._commit()
             return True
         return False
 
+        # Translations Management (AI call would happen in app.py or service layer)
+    def create_translation(self, sentence_id, translated_text, target_language, confidence=None):
+        sentence = Sentences.query.get(sentence_id)
+        if not sentence:
+            raise ValueError("Sentence not found")
+        translation = Translations(
+            sentence_id=sentence_id,
+            translated_text=translated_text,
+            target_language_code=target_language,
+            created_at=datetime.utcnow()
+        )
+        if confidence:
+            translation.translation_confidence = confidence  # Add this field to model if missing
+        self.db.session.add(translation)
+        self._commit()
+        # Also create initial Learning_Progress
+        self.create_learning_progress(sentence.user_id, translation.id)
+        return translation
