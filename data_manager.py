@@ -27,6 +27,17 @@ class DataManager:
     def get_user(self, user_id):
         return User.query.get(user_id)
 
+    # get all users for test reasons
+    # TODO remove this
+    def get_users(self):
+        users = User.query.all()
+        return [{
+            'id': user.id,
+            'username': user.username,
+            'native_language': user.native_language,
+            'created_at': user.created_at.isoformat() if user.created_at else None
+        } for user in users]
+
     def add_target_language(self, user_id, language_code):
         if not self.get_user(user_id):
             raise ValueError("User not found")
