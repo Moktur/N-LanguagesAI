@@ -24,8 +24,11 @@ class DataManager:
         self._commit()
         return user
 
-    def get_user(self, user_id):
+    def get_user_by_id(self, user_id):
         return User.query.get(user_id)
+
+    def get_user_by_username(self, username):
+        return User.query.get(username)
 
     # get all users for test reasons
     # TODO remove this
@@ -39,7 +42,7 @@ class DataManager:
         } for user in users]
 
     def add_target_language(self, user_id, language_code):
-        if not self.get_user(user_id):
+        if not self.get_user_by_id(user_id):
             raise ValueError("User not found")
         if User_Languages.query.filter_by(user_id=user_id, language_code=language_code).first():
             raise ValueError("Language already added")
@@ -54,7 +57,7 @@ class DataManager:
 
        # Sentences Management
     def create_sentence(self, user_id, original_text, category=None):
-        user = self.get_user(user_id)
+        user = self.get_user_by_id(user_id)
         if not user:
             raise ValueError("User not found")
         sentence = Sentences(
