@@ -57,5 +57,16 @@ class Learning_Progress(db.Model):
     # every user has for every translation only one progressdataset
     __table_args__ = (db.UniqueConstraint('user_id', 'translation_id'),)
 
+class Progress_Groups(db.Model):
+    __tablename__ = 'progress_groups'
+    id = db.Column(db.Integer, primary_key=True)
+    sentence_id = db.Column(db.Integer, db.ForeignKey('sentences.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    group_score = db.Column(db.Float, default=0.0)
+    next_review = db.Column(db.Date)
+    last_reviewed = db.Column(db.DateTime)
+    review_count = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 
