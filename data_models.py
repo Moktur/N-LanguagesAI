@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-
+from datetime import datetime
 db = SQLAlchemy()
 
 
@@ -41,6 +41,7 @@ class Translations(db.Model):
     translated_text = db.Column(db.String(200))
     target_language_code = db.Column(db.String(5))
     created_at = db.Column(db.Date)
+    group_id = db.Column(db.Integer, db.ForeignKey('progress_groups.id'))
 
 
 class Learning_Progress(db.Model):
@@ -49,6 +50,7 @@ class Learning_Progress(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     translation_id = db.Column(db.Integer, db.ForeignKey('translations.id'), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey('progress_groups.id'))
     score = db.Column(db.Integer, default=0)
     last_reviewed = db.Column(db.Date)
     next_review = db.Column(db.Date)
