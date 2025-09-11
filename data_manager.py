@@ -86,6 +86,33 @@ class DataManager:
             return True
         return False
 
+    def delete_user(self, user_id):
+        user = User.query.get(user_id)
+        if not user:
+            return False
+        
+        # Lösche alle abhängigen Daten in der richtigen Reihenfolge
+        # Learning_Progress User
+        Learning_Progress.query.filter_by(user_id=user_id).delete()
+        
+        # User_Languages User
+        User_Languages.query.filter_by(user_id=user_id).delete()
+        
+        # all Sentences User
+        user_sentences = Sentences.query.filter_by(user_id=user_id).all()
+        
+        # Deleting Translations and Progress
+        for sentence in user_sentences:
+            Translations.query.filter_by(sentence_id=sentence.id).delete()
+            Progress_Groups.query.filter_by(sentence_id=sentence.id).delete()
+            self.db.session.delete(sentence)
+        
+        # Delete user
+        self.db.session.delete(user)
+        self._commit()
+        return True
+            
+
     # Translations Management
     def create_translation(self, sentence_id, translated_text, target_language, group_id, confidence=None):
         sentence = Sentences.query.get(sentence_id)

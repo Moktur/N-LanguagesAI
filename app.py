@@ -259,6 +259,75 @@ def get_user_languages(user_id):
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/users/<int:user_id>/languages/<string:language_code>', methods=['DELETE'])
+def delete_user_language(user_id, language_code):
+    """
+    Remove a target language from a user
+    ---
+    tags:
+      - Users
+    summary: Remove target language
+    description: Removes a target language from a user's profile.
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the user
+      - name: language_code
+        in: path
+        type: string
+        required: true
+        description: Language code to remove
+    responses:
+      200:
+        description: Language removed successfully
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+      404:
+        description: User or language not found
+    """
+    # This would require implementing a delete method in DataManager
+    return jsonify({'error': 'Not implemented yet'}), 501
+
+@app.route('/api/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """
+    Delete a user
+    ---
+    tags:
+      - Users
+    summary: Delete a user
+    description: Deletes a user and all associated data (sentences, translations, progress).
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the user to delete
+    responses:
+      200:
+        description: User deleted successfully
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+      404:
+        description: User not found
+    """
+    success = manager.delete_user(user_id)
+    if success:
+        return jsonify({'success': True}), 200
+    else:
+        return jsonify({'error': 'User not found'}), 404
+
+
 # ==================== SENTENCES MANAGEMENT ENDPOINTS ====================
 
 @app.route('/api/sentences', methods=['POST'])
