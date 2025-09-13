@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api, Resource
 from flasgger import Swagger, swag_from
 from datetime import datetime
-from data_models import db
+from src.server.models.data_models import db
 from data_manager import DataManager
 import routes
 

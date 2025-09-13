@@ -7,7 +7,7 @@ from data_models import db
 from data_manager import DataManager
 
 
-@api_bp.route('/')
+@app.route('/')
 def index():
     """
     Get all users
@@ -38,7 +38,7 @@ def index():
 
 # ==================== USER MANAGEMENT ENDPOINTS ====================
 
-@api_bp.route('/api/users', methods=['POST'])
+@app.route('/api/users', methods=['POST'])
 def create_user():
     """
     Creates a User profile
@@ -95,7 +95,7 @@ def create_user():
     except Exception as e:
         return jsonify({'error': 'Server error'}), 500
 
-@api_bp.route('/api/users/<int:user_id>', methods=['GET'])
+@app.route('/api/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     """
     Get user details
@@ -138,7 +138,7 @@ def get_user(user_id):
     else:
         return jsonify({'error': 'User not found'}), 404
 
-@api_bp.route('/api/users/<int:user_id>/languages/<string:language_code>', methods=['POST'])
+@app.route('/api/users/<int:user_id>/languages/<string:language_code>', methods=['POST'])
 def add_user_language(user_id, language_code):
     """
     Add a target language to a user
@@ -191,8 +191,7 @@ def add_user_language(user_id, language_code):
     except Exception as e:
         return jsonify({'error': 'Server error'}), 500
 
-
-@api_bp.route('/api/users/<int:user_id>/languages', methods=['GET'])
+@app.route('/api/users/<int:user_id>/languages', methods=['GET'])
 def get_user_languages(user_id):
     """
     Get user's target languages
@@ -242,7 +241,7 @@ def get_user_languages(user_id):
         return jsonify({'error': str(e)}), 500
 
 
-@api_bp.route('/api/users/<int:user_id>/languages/<string:language_code>', methods=['DELETE'])
+@app.route('/api/users/<int:user_id>/languages/<string:language_code>', methods=['DELETE'])
 def delete_user_language(user_id, language_code):
     """
     Remove a target language from a user
@@ -277,8 +276,7 @@ def delete_user_language(user_id, language_code):
     # This would require implementing a delete method in DataManager
     return jsonify({'error': 'Not implemented yet'}), 501
 
-
-@api_bp.route('/api/users/<int:user_id>', methods=['DELETE'])
+@app.route('/api/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     """
     Delete a user
@@ -314,7 +312,7 @@ def delete_user(user_id):
 
 # ==================== SENTENCES MANAGEMENT ENDPOINTS ====================
 
-@api_bp.route('/api/sentences', methods=['POST'])
+@app.route('/api/sentences', methods=['POST'])
 def add_sentence():
     """
     Create a new sentence
@@ -405,8 +403,7 @@ def add_sentence():
     except Exception as e:
         return jsonify({'error': 'Server error: ' + str(e)}), 500
 
-
-@api_bp.route('/api/sentences/<int:user_id>', methods=['GET'])
+@app.route('/api/sentences/<int:user_id>', methods=['GET'])
 def get_sentences(user_id):
     """
     Get all sentences for a user
@@ -461,8 +458,7 @@ def get_sentences(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@api_bp.route('/api/sentences/<int:user_id>/category/<string:category>', methods=['GET'])
+@app.route('/api/sentences/<int:user_id>/category/<string:category>', methods=['GET'])
 def get_sentences_by_category(user_id, category):
     """
     Get sentences by category for a user
@@ -522,8 +518,7 @@ def get_sentences_by_category(user_id, category):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@api_bp.route('/api/sentences/<int:sentence_id>', methods=['DELETE'])
+@app.route('/api/sentences/<int:sentence_id>', methods=['DELETE'])
 def delete_sentence(sentence_id):
     """
     Delete a sentence
@@ -560,7 +555,7 @@ def delete_sentence(sentence_id):
 
 # ==================== LEARNING MANAGEMENT ENDPOINTS ====================
 
-@api_bp.route('/api/learn/user/<int:user_id>/due', methods=['GET'])
+@app.route('/api/learn/user/<int:user_id>/due', methods=['GET'])
 def get_due_reviews(user_id):
     """
     Get due progress groups for a user
@@ -622,7 +617,7 @@ def get_due_reviews(user_id):
         return jsonify({'error': str(e)}), 500
 
 
-@api_bp.route('/api/learn/stats/<int:user_id>', methods=['GET'])
+@app.route('/api/learn/stats/<int:user_id>', methods=['GET'])
 def get_learning_stats(user_id):
     """
     Get learning statistics for a user

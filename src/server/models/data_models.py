@@ -1,6 +1,6 @@
 # from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from server.extensions import db
+from src.server.extensions import db
 
 
 class User(db.Model):
