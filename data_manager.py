@@ -54,6 +54,12 @@ class DataManager:
         return User_Languages.query.filter_by(user_id=user_id).all()
 
     # Sentences Management
+
+    def get_user_categories(self, user_id):
+    # Gibt alle eindeutigen Kategorien eines Benutzers zurück
+    categories = Sentences.query.filter_by(user_id=user_id).with_entities(Sentences.category).distinct().all()
+    return [category[0] for category in categories if category[0]]
+
     def create_sentence(self, user_id, original_text, category=None):
         user = self.get_user_by_id(user_id)
         if not user:
@@ -85,6 +91,7 @@ class DataManager:
             self._commit()
             return True
         return False
+
 
     def delete_user(self, user_id):
         user = User.query.get(user_id)
@@ -131,6 +138,12 @@ class DataManager:
         self._commit()
         # progress will be administrated on group level
         return translation
+
+    def get_translations_by_sentence(self, sentence_id):
+    return Translations.query.filter_by(sentence_id=sentence_id).all()
+
+    def get_translations_by_group(self, group_id):
+        return Translations.query.filter_by(group_id=group_id).all()
 
     # Progress Groups Management
     def create_progress_group(self, sentence_id, user_id):
