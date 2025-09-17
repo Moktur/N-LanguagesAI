@@ -1,8 +1,8 @@
 from sqlalchemy import and_, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from datetime import datetime, timedelta
-from server.extensions import db
-from server.models.data_models import (
+from src.server.extensions import db
+from src.server.models.data_models import (
     User, User_Languages, Sentences,
     Translations, Learning_Progress, Progress_Groups
 )
@@ -60,9 +60,9 @@ class DataManager:
     # Sentences Management
 
     def get_user_categories(self, user_id):
-    # Gibt alle eindeutigen Kategorien eines Benutzers zurück
-    categories = Sentences.query.filter_by(user_id=user_id).with_entities(Sentences.category).distinct().all()
-    return [category[0] for category in categories if category[0]]
+        # returns all identified categories of a user
+        categories = Sentences.query.filter_by(user_id=user_id).with_entities(Sentences.category).distinct().all()
+        return [category[0] for category in categories if category[0]]
 
     def create_sentence(self, user_id, original_text, category=None):
         user = self.get_user_by_id(user_id)
@@ -144,7 +144,7 @@ class DataManager:
         return translation
 
     def get_translations_by_sentence(self, sentence_id):
-    return Translations.query.filter_by(sentence_id=sentence_id).all()
+        return Translations.query.filter_by(sentence_id=sentence_id).all()
 
     def get_translations_by_group(self, group_id):
         return Translations.query.filter_by(group_id=group_id).all()

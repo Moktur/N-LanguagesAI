@@ -5,7 +5,7 @@ from flasgger import Swagger, swag_from
 from datetime import datetime
 from src.server.models.data_models import db
 from data_manager import DataManager
-import routes
+from src.server.api.routes import api_bp
 
 
 
@@ -19,18 +19,20 @@ def create_app():
         'uiversion': 3,
         'description': 'API for multilingual language learning application'
     }
+    # create data manager for the app
+    app.manager = DataManager()
 
     # initial extensions
     swagger = Swagger(app)
     db.init_app(app)
 
-    # import and register blueprints
-    from server.api.routes import api_bp
+    # register blueprints
     app.register_blueprint(api_bp, url_prefix='/api')
 
     # import models for database creation
-    from server.models import data_models
+    from src.server.models import data_models
     with app.app_context():
         db.create_all()
+        
 
     return app

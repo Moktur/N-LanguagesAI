@@ -1,11 +1,14 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Blueprint, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api, Resource
 from flasgger import Swagger, swag_from
 from datetime import datetime
-from data_models import db
-from data_manager import DataManager
+from src.server.models.data_models import db
+from src.server.data_manager import DataManager
 
+
+# creating blueprint
+api_bp = Blueprint('api', __name__)
 
 @api_bp.route('/')
 def index():
@@ -33,12 +36,12 @@ def index():
               created_at:
                 type: string
     """
-    users = manager.get_users()
+    users = current_app.manager.get_users()
     return jsonify(users), 200
 
 # ==================== USER MANAGEMENT ENDPOINTS ====================
 
-@api_bp.route('/api/users', methods=['POST'])
+@api_bp.route('/users', methods=['POST'])
 def create_user():
     """
     Creates a User profile
@@ -82,7 +85,7 @@ def create_user():
         if not username or not native_language:
             return jsonify({'error': 'Username and native_language are required'}), 400
             
-        user = manager.create_user(username, native_language)
+        user = current_app.manager.create_user(username, native_language)
         return jsonify({
             'id': user.id,
             'username': user.username,
@@ -95,7 +98,7 @@ def create_user():
     except Exception as e:
         return jsonify({'error': 'Server error'}), 500
 
-@api_bp.route('/api/users/<int:user_id>', methods=['GET'])
+@api_bp.route('/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     """
     Get user details
@@ -127,7 +130,7 @@ def get_user(user_id):
       404:
         description: User not found
     """
-    user = manager.get_user_by_id(user_id)
+    user = current_app.manager.get_user_by_id(user_id)
     if user:
         return jsonify({
             'id': user.id,
@@ -138,7 +141,7 @@ def get_user(user_id):
     else:
         return jsonify({'error': 'User not found'}), 404
 
-@api_bp.route('/api/users/<int:user_id>/languages/<string:language_code>', methods=['POST'])
+@api_bp.route('/users/<int:user_id>/languages/<string:language_code>', methods=['POST'])
 def add_user_language(user_id, language_code):
     """
     Add a target language to a user
@@ -178,7 +181,7 @@ def add_user_language(user_id, language_code):
         description: User not found
     """
     try:
-        lang = manager.add_target_language(user_id, language_code)
+        lang = current_app.manager.add_target_language(user_id, language_code)
         return jsonify({
             'id': lang.id,
             'user_id': lang.user_id,
@@ -192,7 +195,7 @@ def add_user_language(user_id, language_code):
         return jsonify({'error': 'Server error'}), 500
 
 
-@api_bp.route('/api/users/<int:user_id>/languages', methods=['GET'])
+@api_bp.route('/users/<int:user_id>/languages', methods=['GET'])
 def get_user_languages(user_id):
     """
     Get user's target languages
@@ -227,7 +230,7 @@ def get_user_languages(user_id):
         description: User not found
     """
     try:
-        user_languages = manager.get_user_languages(user_id)
+        user_languages = current_app.manager.get_user_languages(user_id)
         languages_list = []
         for lang in user_languages:
             languages_list.append({
@@ -242,7 +245,7 @@ def get_user_languages(user_id):
         return jsonify({'error': str(e)}), 500
 
 
-@api_bp.route('/api/users/<int:user_id>/languages/<string:language_code>', methods=['DELETE'])
+@api_bp.route('/users/<int:user_id>/languages/<string:language_code>', methods=['DELETE'])
 def delete_user_language(user_id, language_code):
     """
     Remove a target language from a user
@@ -278,7 +281,7 @@ def delete_user_language(user_id, language_code):
     return jsonify({'error': 'Not implemented yet'}), 501
 
 
-@api_bp.route('/api/users/<int:user_id>', methods=['DELETE'])
+@api_bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     """
     Delete a user
@@ -305,7 +308,7 @@ def delete_user(user_id):
       404:
         description: User not found
     """
-    success = manager.delete_user(user_id)
+    success = current_app.manager.delete_user(user_id)
     if success:
         return jsonify({'success': True}), 200
     else:
@@ -314,7 +317,7 @@ def delete_user(user_id):
 
 # ==================== SENTENCES MANAGEMENT ENDPOINTS ====================
 
-@api_bp.route('/api/sentences', methods=['POST'])
+@api_bp.route('/sentences', methods=['POST'])
 def add_sentence():
     """
     Create a new sentence
@@ -371,20 +374,20 @@ def add_sentence():
             return jsonify({'error': 'Missing required fields'}), 400
             
         # Create sentence
-        sentence = manager.create_sentence(user_id, original_text, category)
+        sentence = current_app.manager.create_sentence(user_id, original_text, category)
         
         # Create progress group for this sentence
-        group = manager.create_progress_group(sentence.id, user_id)
+        group = current_app.manager.create_progress_group(sentence.id, user_id)
         
         # Get user's target languages
-        user_languages = manager.get_user_languages(user_id)
+        user_languages = current_app.manager.get_user_languages(user_id)
         
         # For each target language, create translation (AI would generate these)
         # This is a placeholder - you would call your AI service here
         for lang in user_languages:
             # In a real implementation, you would call an AI translation service
             translated_text = f"Translation of '{original_text}' to {lang.language_code}"
-            manager.create_translation(
+            current_app.manager.create_translation(
                 sentence.id, 
                 translated_text, 
                 lang.language_code, 
@@ -406,7 +409,7 @@ def add_sentence():
         return jsonify({'error': 'Server error: ' + str(e)}), 500
 
 
-@api_bp.route('/api/sentences/<int:user_id>', methods=['GET'])
+@api_bp.route('/sentences/<int:user_id>', methods=['GET'])
 def get_sentences(user_id):
     """
     Get all sentences for a user
@@ -445,7 +448,7 @@ def get_sentences(user_id):
         description: User not found
     """
     try:
-        sentences = manager.get_sentences_for_user(user_id)
+        sentences = current_app.manager.get_sentences_for_user(user_id)
         sentences_list = []
         for sentence in sentences:
             sentences_list.append({
@@ -462,7 +465,7 @@ def get_sentences(user_id):
         return jsonify({'error': str(e)}), 500
 
 
-@api_bp.route('/api/sentences/<int:user_id>/category/<string:category>', methods=['GET'])
+@api_bp.route('/sentences/<int:user_id>/category/<string:category>', methods=['GET'])
 def get_sentences_by_category(user_id, category):
     """
     Get sentences by category for a user
@@ -506,7 +509,7 @@ def get_sentences_by_category(user_id, category):
         description: User not found
     """
     try:
-        sentences = manager.get_sentences_by_category(user_id, category)
+        sentences = current_app.manager.get_sentences_by_category(user_id, category)
         sentences_list = []
         for sentence in sentences:
             sentences_list.append({
@@ -523,7 +526,7 @@ def get_sentences_by_category(user_id, category):
         return jsonify({'error': str(e)}), 500
 
 
-@api_bp.route('/api/sentences/<int:sentence_id>', methods=['DELETE'])
+@api_bp.route('/sentences/<int:sentence_id>', methods=['DELETE'])
 def delete_sentence(sentence_id):
     """
     Delete a sentence
@@ -550,7 +553,7 @@ def delete_sentence(sentence_id):
       404:
         description: Sentence not found
     """
-    success = manager.delete_sentence(sentence_id)
+    success = current_app.manager.delete_sentence(sentence_id)
     if success:
         return jsonify({'success': True}), 200
     else:
@@ -560,7 +563,7 @@ def delete_sentence(sentence_id):
 
 # ==================== LEARNING MANAGEMENT ENDPOINTS ====================
 
-@api_bp.route('/api/learn/user/<int:user_id>/due', methods=['GET'])
+@api_bp.route('/learn/user/<int:user_id>/due', methods=['GET'])
 def get_due_reviews(user_id):
     """
     Get due progress groups for a user
@@ -603,7 +606,7 @@ def get_due_reviews(user_id):
         description: User not found
     """
     try:
-        due_groups = manager.get_due_progress_groups(user_id)
+        due_groups = current_app.manager.get_due_progress_groups(user_id)
         groups_list = []
         for group in due_groups:
             groups_list.append({
@@ -622,7 +625,7 @@ def get_due_reviews(user_id):
         return jsonify({'error': str(e)}), 500
 
 
-@api_bp.route('/api/learn/stats/<int:user_id>', methods=['GET'])
+@api_bp.route('/learn/stats/<int:user_id>', methods=['GET'])
 def get_learning_stats(user_id):
     """
     Get learning statistics for a user
@@ -651,7 +654,7 @@ def get_learning_stats(user_id):
         description: User not found
     """
     try:
-        stats = manager.get_learning_stats(user_id)
+        stats = current_app.manager.get_learning_stats(user_id)
         return jsonify(stats)
         
     except Exception as e:
