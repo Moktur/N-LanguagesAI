@@ -168,108 +168,65 @@ flowchart TD
 
 ```mermaid
 erDiagram
-    USERS ||--o{ USER_LANGUAGES : "has"
-    USERS ||--o{ SENTENCES : "creates"
-    USERS ||--o{ LEARNING_PROGRESS : "tracks"
-    SENTENCES ||--o{ TRANSLATIONS : "has"
-    TRANSLATIONS ||--o{ LEARNING_PROGRESS : "has"
+    USERS ||--o{ USER_LANGUAGES : "has many"
+    USERS ||--o{ SENTENCES : "creates many"
+    USERS ||--o{ LEARNING_PROGRESS : "tracks many"
+    USERS ||--o{ PROGRESS_GROUPS : "has many"
+    SENTENCES ||--o{ TRANSLATIONS : "has many"
+    SENTENCES ||--o{ PROGRESS_GROUPS : "groups many"
+    TRANSLATIONS ||--|{ LEARNING_PROGRESS : "has one progress per user"
+    PROGRESS_GROUPS ||--o{ TRANSLATIONS : "groups many"
+    PROGRESS_GROUPS ||--o{ LEARNING_PROGRESS : "groups many"
 
     USERS {
         int id PK
-        string username
+        string username UK
         string native_language
-        datetime created_at
+        date created_at
     }
-
     USER_LANGUAGES {
         int id PK
         int user_id FK
         string language_code
-        datetime created_at
+        date created_at
     }
-
     SENTENCES {
         int id PK
         int user_id FK
         string original_text
         string language_code
         string category
-        datetime created_at
+        date created_at
     }
-
     TRANSLATIONS {
         int id PK
         int sentence_id FK
         string translated_text
-        string target_language
-        datetime created_at
+        string target_language_code
+        date created_at
+        int group_id FK
     }
-
     LEARNING_PROGRESS {
         int id PK
         int user_id FK
         int translation_id FK
-        decimal score
-        datetime last_reviewed
-        datetime next_review
+        int group_id FK
+        int score
+        date last_reviewed
+        date next_review
         int review_count
-        decimal success_rate
+        int success_rate
     }
-```
-
-
-### MVP Schema
-```sql
--- Users with native language
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    native_language VARCHAR(5) NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Target languages per user
-CREATE TABLE user_languages (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
-    language_code VARCHAR(5) NOT NULL,
-    UNIQUE(user_id, language_code),
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Original sentences with category
-CREATE TABLE sentences (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
-    original_text TEXT NOT NULL,
-    language_code VARCHAR(5) NOT NULL,
-    category VARCHAR(50),  -- e.g., "Arbeit", "Essen"
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- AI-generated translations
-CREATE TABLE translations (
-    id SERIAL PRIMARY KEY,
-    sentence_id INTEGER REFERENCES sentences(id),
-    translated_text TEXT NOT NULL,
-    target_language VARCHAR(5) NOT NULL,
-    translation_confidence DECIMAL(3,2),
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Anki learning progress
-CREATE TABLE learning_progress (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
-    translation_id INTEGER REFERENCES translations(id),
-    ease_factor DECIMAL(4,2) DEFAULT 2.50,
-    interval_days INTEGER DEFAULT 1,
-    repetitions INTEGER DEFAULT 0,
-    last_score DECIMAL(4,2),
-    next_review DATE DEFAULT CURRENT_DATE,
-    UNIQUE(user_id, translation_id),
-    created_at TIMESTAMP DEFAULT NOW()
-);
+    PROGRESS_GROUPS {
+        int id PK
+        int sentence_id FK
+        int user_id FK
+        float group_score
+        date next_review
+        datetime last_reviewed
+        int review_count
+        datetime created_at
+    }
 ```
 
 ## 🎯 Project Features
